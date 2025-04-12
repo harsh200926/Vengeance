@@ -252,9 +252,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // Process each file
             for (const file of fileList) {
                 try {
-                    const response = await fetch(`DiaryEntries/${file}`);
+                    // Update the path to handle deployed environment properly
+                    const response = await fetch(`./DiaryEntries/${file}`);
                     if (!response.ok) {
-                        throw new Error(`Failed to fetch ${file}`);
+                        console.error(`Failed to fetch ${file}, status: ${response.status}`);
+                        continue; // Skip this file and continue with the next
                     }
                     
                     const content = await response.text();
@@ -292,6 +294,7 @@ document.addEventListener('DOMContentLoaded', function() {
             entriesContainer.innerHTML = `
                 <div class="error-message">
                     <p>Could not load the diary entries. Please try again later.</p>
+                    <p>Error details: ${error.message}</p>
                 </div>
             `;
         }
@@ -300,18 +303,38 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to fetch file list (simulated as we can't directly fetch from the filesystem in a browser)
     // In a real environment, this would be handled by a server-side API
     async function fetchFileList() {
+        // First try the PHP endpoint
         try {
-            // In a real environment, this would make an API call to get the files
-            const response = await fetch('get_diary_entries.php');
+            const response = await fetch('./get_diary_entries.php');
             if (response.ok) {
-                return await response.json();
+                const data = await response.json();
+                console.log('Successfully fetched file list from PHP:', data);
+                return data;
+            } else {
+                console.error('Failed to fetch file list from PHP:', response.status);
+                // Don't throw, try next method
             }
         } catch (error) {
-            console.warn('Could not fetch file list dynamically, using fallback list', error);
+            console.warn('Could not fetch file list from PHP, trying static JSON file', error);
         }
         
-        // Fallback: This is needed as we're running in a static environment without a server
-        // This is a dynamically generated list from processed_journal.txt
+        // Second, try a static JSON file (entries.json) that could be pre-generated
+        try {
+            const response = await fetch('./entries.json');
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Successfully fetched file list from static JSON:', data);
+                return data;
+            } else {
+                console.error('Failed to fetch static entries.json:', response.status);
+                // Don't throw, use hardcoded fallback
+            }
+        } catch (error) {
+            console.warn('Could not fetch static entries.json, using hardcoded fallback list', error);
+        }
+        
+        // Finally, use the hardcoded fallback list
+        console.log('Using hardcoded fallback list of entries');
         return [
             "2024-06-20_21-39-47.txt",
             "2024-06-21_09-58-52.txt",
