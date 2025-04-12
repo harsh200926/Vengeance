@@ -1,0 +1,23 @@
+2024-09-16 10:37:58
+-------------------
+EXECUTING THE PLAN
+# Routine for School day (what should do?, what not) 
+
+| S. no. | Tasks | Time limit | What to do ? | 
+| --- | --- | --- | --- | 
+| 1 | Wake up | 4:30 to 5:00 | Thank god, and say you are best, you can achieve that goal, nothing can stop me  | 
+| 2 | Fresh out  | 5:15 | drink 0.5L water, you can listen music | 
+| 3 | Go to Stadium  | 5:20 | running, sprinting, meditate, walk in nature  | 
+| 4 | Ready for school | 6:30 | read books while going  | 
+| 5 | Make school day productive | 8:00 to 2:00 | do DPP’s and solve module | 
+| 6 | Come home  | 2:00 to 3:00 | try to read books while travelling | 
+| 7 | Teach  | 3:00 to 4:00 | learn something new | 
+| 8 | If H.W. is not complete then complete it | (assuming that you have completed) | solve with full focus and don’t listen music or scroll reels  | 
+| 9 | Take lecture  | 4:00 to 8:00 | make notes simultaneously | 
+| 10 | Take Break after lecture  | 8:20 | rest  | 
+| 11 | Exercise | 8:20 to 9:00 | you can listen music  | 
+| 12 | Meditate  | 9:00 to 9:30 | remember | 
+| 13 | Do lecture questions and H.W. | 10:00 to 11:30 | now you can listen music | 
+| 14 | Sleep | 11:30  | remind your goal | 
+
+follow this time table, you’ll never disappoint!

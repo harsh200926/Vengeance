@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Emoji Fixer</title>
+    <!-- Added Noto Sans font for better unicode character support -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            color: #d23669;
+            text-align: center;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-family: 'Noto Sans', 'Noto Sans Devanagari', sans-serif;
+        }
+        button {
+            background-color: #d23669;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #b32e59;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f5f5f5;
+            white-space: pre-wrap;
+            font-family: 'Noto Sans', 'Noto Sans Devanagari', sans-serif;
+        }
+        .file-selector {
+            margin-bottom: 20px;
+        }
+        select {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            width: 100%;
+            font-size: 16px;
+        }
+        .info {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+        /* Style for Hindi text */
+        .hindi-text {
+            font-family: 'Noto Sans Devanagari', 'Noto Sans', sans-serif;
+            color: #d23669;
+        }
+    </style>
+</head>
+<body>
+    <h1>Diary Emoji Fixer</h1>
+    <div class="container">
+        <div class="file-selector">
+            <label for="fileSelect">Select a diary entry to edit:</label>
+            <select id="fileSelect">
+                <option value="">-- Select a file --</option>
+                <!-- Files will be added here via JavaScript -->
+            </select>
+        </div>
+        
+        <textarea id="inputText" placeholder="Paste text with broken emojis here..."></textarea>
+        
+        <div class="button-container">
+            <div>
+                <button id="fixButton">Fix Emojis</button>
+                <button id="saveButton">Save to File</button>
+            </div>
+            <button id="copyButton">Copy Fixed Text</button>
+        </div>
+        
+        <div class="result" id="resultBox"></div>
+        
+        <p class="info">This tool fixes common emoji encoding issues in your diary entries. Select a file from the dropdown or paste text directly in the textarea, then click "Fix Emojis" to repair it.</p>
+        <p class="info">Example of properly fixed Hindi text: <span class="hindi-text">जी❤️</span></p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputText = document.getElementById('inputText');
+            const resultBox = document.getElementById('resultBox');
+            const fixButton = document.getElementById('fixButton');
+            const copyButton = document.getElementById('copyButton');
+            const saveButton = document.getElementById('saveButton');
+            const fileSelect = document.getElementById('fileSelect');
+            
+            // Load the file list
+            loadFileList();
+            
+            // Fix emoji button
+            fixButton.addEventListener('click', function() {
+                const text = inputText.value;
+                const fixedText = fixEmojiEncoding(text);
+                // Apply proper styling for Hindi text
+                resultBox.innerHTML = applyHindiClass(fixedText);
+            });
+            
+            // Copy button
+            copyButton.addEventListener('click', function() {
+                if (resultBox.textContent) {
+                    navigator.clipboard.writeText(resultBox.textContent)
+                        .then(() => {
+                            alert('Fixed text copied to clipboard!');
+                        })
+                        .catch(err => {
+                            console.error('Could not copy text: ', err);
+                        });
+                }
+            });
+            
+            // Save button (this would normally save to server, but we'll simulate it)
+            saveButton.addEventListener('click', function() {
+                if (resultBox.textContent && fileSelect.value) {
+                    alert(`In a real environment, this would save the fixed text to: ${fileSelect.value}`);
+                    
+                    // Here you would send the fixed text to a server endpoint to save it
+                    // For now, we'll offer a download
+                    const blob = new Blob([resultBox.textContent], {type: 'text/plain'});
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileSelect.value;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                } else {
+                    alert('Please select a file and fix the text first.');
+                }
+            });
+            
+            // File selection change
+            fileSelect.addEventListener('change', function() {
+                if (fileSelect.value) {
+                    loadFileContent(fileSelect.value);
+                }
+            });
+            
+            // Function to load file list
+            async function loadFileList() {
+                try {
+                    const files = await fetchFileList();
+                    files.forEach(file => {
+                        const option = document.createElement('option');
+                        option.value = file;
+                        option.textContent = file;
+                        fileSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error loading file list:', error);
+                }
+            }
+            
+            // Function to load file content
+            async function loadFileContent(fileName) {
+                try {
+                    const response = await fetch(`DiaryEntries/${fileName}`);
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch ${fileName}`);
+                    }
+                    const content = await response.text();
+                    inputText.value = content;
+                    resultBox.innerHTML = '';
+                } catch (error) {
+                    console.error(`Error loading file content for ${fileName}:`, error);
+                    inputText.value = `Error loading file: ${error.message}`;
+                }
+            }
+            
+            // Function to fix emoji encoding
+            function fixEmojiEncoding(text) {
+                // Replace common problematic patterns with their actual emoji and special character representation
+                return text
+                    // Fix emojis
+                    .replace(/ðŸ'–/g, '💖')
+                    .replace(/ðŸ'ðŸ'Œ/g, '💐💌')
+                    .replace(/ðŸ'Œ/g, '💌')
+                    .replace(/ðŸ'/g, '💐')
+                    .replace(/ðŸ«¶/g, '🫶')
+                    .replace(/ðŸ«´/g, '🫴')
+                    .replace(/ðŸ'«/g, '💫')
+                    .replace(/ðŸ•Šï¸/g, '🕊️')
+                    .replace(/ðŸ•Š/g, '🕊')
+                    .replace(/ðŸ'"/g, '💞')
+                    .replace(/ðŸ˜­/g, '😭')
+                    .replace(/ðŸ¥¹/g, '🥹')
+                    .replace(/ðŸ™‚/g, '🙂')
+                    .replace(/ðŸ'©/g, '💩')
+                    .replace(/â¤ï¸â€/g, '❤️‍')
+                    .replace(/â¤ï¸ðŸ©¹/g, '❤️‍🩹')
+                    .replace(/â¤ï¸/g, '❤️')
+                    .replace(/âœ¨/g, '✨')
+                    .replace(/ðŸŒ¼/g, '🌼')
+                    .replace(/ðŸŒ·/g, '🌷')
+                    .replace(/ðŸŒ¹/g, '🌹')
+                    .replace(/ðŸ'š/g, '💚')
+                    .replace(/ðŸ'"/g, '💝')
+                    .replace(/ðŸ'—/g, '💗')
+                    .replace(/ðŸ'"/g, '💓')
+                    .replace(/ðŸ'€/g, '💀')
+                    .replace(/ðŸ§¸/g, '🧸')
+                    .replace(/ðŸ¥‚/g, '🥂')
+                    .replace(/ðŸ'€/g, '👀')
+                    .replace(/ðŸ¤Œ/g, '🤌')
+                    .replace(/ðŸŒ¸/g, '🌸')
+                    .replace(/ðŸª·/g, '🪷')
+                    .replace(/ðŸ'‹/g, '💋')
+                    .replace(/ðŸ¤/g, '😍')
+                    .replace(/ðŸ¥°/g, '🥰')
+                    .replace(/ðŸŸ¢/g, '🟢')
+                    .replace(/ðŸ"¥/g, '🔥')
+                    .replace(/ðŸŒŸ/g, '🌟')
+                    .replace(/ðŸ§¿/g, '🧿')
+                    .replace(/ðŸŒ§ï¸/g, '🌧️')
+                    .replace(/ðŸŽ­/g, '🎭')
+                    .replace(/ðŸ¤/g, '🫠')
+                    .replace(/ðŸ¦¢/g, '🦢')
+                    .replace(/ðŸ§/g, '🧠')
+                    .replace(/ðŸ§¡/g, '🧡')
+                    .replace(/ðŸ'œ/g, '💜')
+                    .replace(/ðŸ'›/g, '💛')
+                    .replace(/ðŸ¥º/g, '🥺')
+                    .replace(/ðŸ«¡/g, '🫡')
+                    .replace(/ðŸ§¿/g, '🧿')
+                    
+                    // Fix Devanagari and other special characters
+                    .replace(/jiÃ¶Å¸"Ã¶Å¸"-/g, "जी❤️")
+                    .replace(/jiÃ¶Å¸â€˜Ã¶Å¸â€™-/g, "जी❤️")
+                    .replace(/jiÃ¶Å¸Ã¶Å¸-/g, "जी❤️")
+                    .replace(/jÃ®âˆ™HÃ¢âˆ™-/g, "जी❤️")
+                    .replace(/ji(.*?)-(.*?)-/g, "जी❤️")
+                    .replace(/à¤œà¥€/g, "जी")
+                    .replace(/jiðŸ¶Å"ðŸ¶Å"-/g, "जी❤️")
+                    .replace(/jiðŸ¶Å"?ðŸ¶Å"?-/g, "जी❤️")
+                    
+                    // Fix Hindi paragraphs from journal - specific replacement patterns
+                    .replace(/à¤…à¤¸à¤«à¤²à¤¤à¤¾ à¤à¤• à¤šà¥à¤¨à¥Œà¤¤à¥€ à¤¹à¥ˆ/g, "असफलता एक चुनौती है")
+                    .replace(/à¤…à¤‚à¤¤ à¤®à¥‡à¤‚ à¤šà¥€à¤œà¤¼à¥‡ à¤…à¤ªà¤¨à¥‡ à¤†à¤ª à¤¸à¤¹à¥€ à¤¹à¥‹à¤‚à¤—à¥€à¥¤/g, "अंत में चीज़े अपने आप सही होंगी।")
+                    .replace(/à¤•à¥‹à¤ˆ à¤¬à¤¹à¤¾à¤¨à¤¾ à¤¨à¤¹à¥€à¤‚ à¤¸à¥à¤¨à¤¤à¤¾à¥¤/g, "कोई बहाना नहीं सुनता।")
+                    
+                    // More specific pattern for entire Hindi paragraphs using broader match
+                    .replace(/à¤([^\s]*)/g, function(match) {
+                        try {
+                            // Convert encoded Devanagari to actual Devanagari
+                            return decodeURIComponent(escape(match));
+                        } catch (e) {
+                            // If decoding fails, attempt character by character replacement
+                            return match
+                                .replace(/à¤…/g, 'अ')
+                                .replace(/à¤†/g, 'आ')
+                                .replace(/à¤‡/g, 'इ')
+                                .replace(/à¤ˆ/g, 'ई')
+                                .replace(/à¤‰/g, 'उ')
+                                .replace(/à¤Š/g, 'ऊ')
+                                .replace(/à¤‹/g, 'ऋ')
+                                .replace(/à¤/g, 'ए')
+                                .replace(/à¤"/g, 'ऐ')
+                                .replace(/à¤"/g, 'ओ')
+                                .replace(/à¤"/g, 'औ')
+                                .replace(/à¤•/g, 'क')
+                                .replace(/à¤–/g, 'ख')
+                                .replace(/à¤—/g, 'ग')
+                                .replace(/à¤˜/g, 'घ')
+                                .replace(/à¤™/g, 'ङ')
+                                .replace(/à¤š/g, 'च')
+                                .replace(/à¤›/g, 'छ')
+                                .replace(/à¤œ/g, 'ज')
+                                .replace(/à¤/g, 'झ')
+                                .replace(/à¤ž/g, 'ञ')
+                                .replace(/à¤Ÿ/g, 'ट')
+                                .replace(/à¤ /g, 'ठ')
+                                .replace(/à¤¡/g, 'ड')
+                                .replace(/à¤¢/g, 'ढ')
+                                .replace(/à¤£/g, 'ण')
+                                .replace(/à¤¤/g, 'त')
+                                .replace(/à¤¥/g, 'थ')
+                                .replace(/à¤¦/g, 'द')
+                                .replace(/à¤§/g, 'ध')
+                                .replace(/à¤¨/g, 'न')
+                                .replace(/à¤ª/g, 'प')
+                                .replace(/à¤«/g, 'फ')
+                                .replace(/à¤¬/g, 'ब')
+                                .replace(/à¤­/g, 'भ')
+                                .replace(/à¤®/g, 'म')
+                                .replace(/à¤¯/g, 'य')
+                                .replace(/à¤°/g, 'र')
+                                .replace(/à¤²/g, 'ल')
+                                .replace(/à¤µ/g, 'व')
+                                .replace(/à¤¶/g, 'श')
+                                .replace(/à¤·/g, 'ष')
+                                .replace(/à¤¸/g, 'स')
+                                .replace(/à¤¹/g, 'ह')
+                                .replace(/à¤¼/g, '़')
+                                .replace(/à¤¾/g, 'ा')
+                                .replace(/à¤¿/g, 'ि')
+                                .replace(/à¥€/g, 'ी')
+                                .replace(/à¥/g, 'ु')
+                                .replace(/à¥‚/g, 'ू')
+                                .replace(/à¥ƒ/g, 'ृ')
+                                .replace(/à¥‡/g, 'े')
+                                .replace(/à¥ˆ/g, 'ै')
+                                .replace(/à¥‹/g, 'ो')
+                                .replace(/à¥Œ/g, 'ौ')
+                                .replace(/à¥/g, '्')
+                                .replace(/à¤‚/g, 'ं')
+                                .replace(/à¤ƒ/g, 'ः')
+                                .replace(/à¥¤/g, '।')
+                                .replace(/à¥¥/g, '॥');
+                        }
+                    })
+                    
+                    // Handle some specific Hindi text patterns seen in the entries
+                    .replace(/piyaðŸ¶Å"/g, "पिया❤️")
+                    .replace(/TUMHE PATA HAI/g, "तुम्हे पता है")
+                    
+                    // Decode HTML entities for special characters
+                    .replace(/&amp;/g, '&')
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&quot;/g, '"')
+                    .replace(/&#39;/g, "'")
+                    .replace(/&#x27;/g, "'")
+                    
+                    // Convert encoding sequences for various languages
+                    .replace(/([\u0080-\u07FF\u0800-\uFFFF]+)/g, function(match) {
+                        try {
+                            // Attempt to properly decode UTF-8 sequences
+                            return decodeURIComponent(escape(match));
+                        } catch (e) {
+                            // If decoding fails, return the original text
+                            return match;
+                        }
+                    });
+            }
+            
+            // Function to apply Hindi class to Devanagari text
+            function applyHindiClass(text) {
+                // Detect Devanagari script and apply proper class
+                return text.replace(/[\u0900-\u097F]+/g, match => `<span class="hindi-text">${match}</span>`);
+            }
+            
+            // Function to fetch file list (simulated)
+            async function fetchFileList() {
+                try {
+                    // In a real environment, this would make an API call to get the files
+                    const response = await fetch('get_diary_entries.php');
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                } catch (error) {
+                    console.warn('Could not fetch file list dynamically, using fallback list', error);
+                }
+                
+                // Fallback: This is needed as we're running in a static environment without a server
+                // This is a dynamically generated list from processed_journal.txt
+                return [
+                    "2024-06-20_21-39-47.txt",
+                    "2024-06-21_09-58-52.txt",
+                    "2024-06-21_18-02-58.txt",
+                    "2024-06-22_08-46-55.txt",
+                    "2024-06-23_09-12-35.txt",
+                    "2024-06-24_07-41-59.txt",
+                    "2024-06-25_06-36-16.txt",
+                    "2024-06-26_07-05-52.txt",
+                    "2024-06-27_06-55-04.txt",
+                    "2024-06-28_05-30-31.txt",
+                    "2024-06-29_09-40-06.txt",
+                    "2024-06-30_07-59-27.txt",
+                    "2024-07-01_08-28-50.txt",
+                    "2024-07-02_21-18-03.txt",
+                    "2024-07-03_06-20-38.txt",
+                    "2024-07-04_23-21-00.txt",
+                    "2024-07-05_23-46-51.txt",
+                    "2024-07-06_16-03-07.txt",
+                    "2024-07-07_21-35-43.txt",
+                    "2024-07-08_06-01-33.txt",
+                    "2024-07-09_12-01-27.txt",
+                    "2024-07-10_22-57-47.txt",
+                    "2024-07-11_18-02-50.txt",
+                    "2024-07-12_09-57-09.txt",
+                    "2024-07-13_08-10-41.txt",
+                    "2024-07-14_21-33-30.txt",
+                    "2024-07-15_21-39-24.txt",
+                    "2024-07-16_14-14-15.txt",
+                    "2024-07-17_08-08-33.txt",
+                    "2024-07-18_05-25-00.txt",
+                    "2024-07-19_13-48-47.txt",
+                    "2024-07-20_19-51-03.txt",
+                    "2024-07-21_05-18-47.txt",
+                    "2024-07-22_09-17-12.txt",
+                    "2024-07-23_18-08-30.txt",
+                    "2024-07-24_05-58-47.txt",
+                    "2024-07-25_18-13-14.txt",
+                    "2024-07-26_11-15-45.txt",
+                    "2024-07-27_07-21-28.txt",
+                    "2024-07-28_14-57-59.txt",
+                    "2024-07-29_18-13-33.txt",
+                    "2024-07-30_21-32-34.txt",
+                    "2024-07-31_20-46-03.txt",
+                    "2024-08-01_20-29-58.txt",
+                    "2024-08-02_12-37-41.txt",
+                    "2024-08-03_18-11-25.txt",
+                    "2024-08-04_23-33-26.txt",
+                    "2024-08-05_23-35-46.txt",
+                    "2024-08-06_23-01-29.txt",
+                    "2024-08-07_16-41-18.txt",
+                    "2024-08-08_17-56-19.txt",
+                    "2024-08-09_19-49-36.txt",
+                    "2024-08-11_20-57-19.txt",
+                    "2024-08-19_07-59-10.txt",
+                    "2024-08-24_23-04-03.txt",
+                    "2024-08-25_03-07-10.txt",
+                    "2024-08-26_11-02-56.txt",
+                    "2024-08-28_21-28-28.txt",
+                    "2024-09-05_15-02-06.txt",
+                    "2024-09-11_00-03-06.txt",
+                    "2024-09-12_18-15-20.txt",
+                    "2024-09-13_09-20-17.txt",
+                    "2024-09-14_00-59-26.txt",
+                    "2024-09-15_17-28-28.txt",
+                    "2024-09-16_10-37-27.txt",
+                    "2024-09-16_10-37-58.txt",
+                    "2024-09-16_10-38-12.txt",
+                    "2024-09-16_10-38-39.txt",
+                    "2024-09-17_22-51-55.txt",
+                    "2024-09-19_18-32-29.txt",
+                    "2024-09-23_23-13-22.txt",
+                    "2024-10-08_22-30-54.txt",
+                    "2024-10-11_14-48-03.txt",
+                    "2024-10-12_23-01-55.txt",
+                    "2024-10-13_23-00-18.txt",
+                    "2024-10-14_11-01-00.txt",
+                    "2024-10-15_22-58-12.txt",
+                    "2024-10-26_14-20-39.txt",
+                    "2024-10-31_13-27-59.txt",
+                    "2024-11-11_22-54-53.txt"
+                ];
+            }
+        });
+    </script>
+</body>
+</html> 

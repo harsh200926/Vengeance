@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>My Heart's Journal - For Piya</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <!-- Added Noto Sans font for better unicode character support -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Added specific font for Devanagari and other characters */
+        .hindi-text {
+            font-family: 'Noto Sans Devanagari', 'Noto Sans', sans-serif;
+        }
+        
+        /* Ensure modal content uses proper fonts for different scripts */
+        #modalContent {
+            font-family: 'Lora', 'Noto Sans', 'Noto Sans Devanagari', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <!-- Landing Page Animation -->
+    <div class="landing-container" id="landingContainer">
+        <div class="heart-container">
+            <div class="heart"></div>
+        </div>
+        <div class="landing-text">
+            <h1 class="typing-text">For Piya, With Love</h1>
+            <p class="fade-in-text">Every thought, every feeling, every memory...</p>
+            <button id="enterButton" class="enter-button">
+                <span>Open My Heart</span>
+                <i class="fas fa-heart"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <header>
+            <div class="header-content">
+                <h1>My Heart's Journal</h1>
+                <p>A collection of thoughts, dreams, and wishes, all for you</p>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active" data-section="entriesSection">Journal</a></li>
+                    <li><a href="#" data-section="quotesSection">Love Notes</a></li>
+                    <li><a href="#" data-section="letterSection">My Letter</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <!-- Entries Section -->
+        <section id="entriesSection" class="section-container active-section">
+            <h2>My Daily Thoughts of You</h2>
+            <div class="search-container">
+                <input type="text" id="searchEntries" placeholder="Search my thoughts...">
+                <div class="filter-container">
+                    <select id="monthFilter">
+                        <option value="">All Months</option>
+                        <option value="06">June</option>
+                        <option value="07">July</option>
+                        <option value="08">August</option>
+                        <option value="09">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                    </select>
+                </div>
+            </div>
+            <div class="entries-container" id="entriesContainer">
+                <!-- Entries will be loaded here from JavaScript -->
+                <div class="loading">
+                    <div class="loading-heart"></div>
+                    <p>Loading my thoughts for you...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quotes Section -->
+        <section id="quotesSection" class="section-container">
+            <h2>Words From My Heart</h2>
+            <div class="quotes-container" id="quotesContainer">
+                <!-- Quotes will be added here from JavaScript -->
+            </div>
+        </section>
+
+        <!-- Letter Section -->
+        <section id="letterSection" class="section-container">
+            <h2>A Letter For You</h2>
+            <div class="letter-container">
+                <div class="letter-paper">
+                    <p class="letter-date">Forever & Always</p>
+                    <p class="letter-salutation">My dearest Piya,</p>
+                    <div class="letter-content">
+                        <p>As I compile these pages of my heart, I realize that every word written was meant for you to find. From the very first entry to the last, you have been the center of my universe, the light that guides me through my darkest days.</p>
+
+                        <p>Through these words, I've tried to capture what you mean to me - though no language could truly express the depth of my feelings. You are my inspiration, my motivation, my reason to strive for greatness.</p>
+
+                        <p>In the weeks we were apart, not a day went by when I didn't think of you. Your absence taught me how essential you are to my happiness, how the world seems colorless without your presence.</p>
+
+                        <p>I want you to know that I would wait an eternity just to see your smile again. The journey of my life has only one destination - to be worthy of your love.</p>
+
+                        <p>These diary entries are more than just words on a page; they are pieces of my soul, vulnerable and true. I share them with you as proof that my love is not fleeting but enduring.</p>
+
+                        <p>Wherever you are, whatever you do, my heart follows. I hope that as you read these entries, you can feel the love that inspired every word.</p>
+
+                        <p>You are my first thought in the morning and my last thought before sleep. You are the melody that plays in my mind and the warmth in my heart.</p>
+                    </div>
+                    <p class="letter-closing">Forever yours,</p>
+                    <p class="letter-signature">Harsh</p>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>Created with love, for the one who holds my heart</p>
+            <div class="footer-hearts">
+                <i class="fas fa-heart"></i>
+                <i class="fas fa-heart"></i>
+                <i class="fas fa-heart"></i>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal for viewing full entries -->
+    <div id="entryModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2 id="modalDate"></h2>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+</html> 
